@@ -1,9 +1,7 @@
 dpi1
 ====
 
-Decomposition-based peak identification, which find peaks across a large number of TSS (transcription starting site) profiles 
-
-This is a sample script to perform decomposition-based peak identification (DPI).
+Decomposition-based peak identification (DPI), which find peaks across a large number of TSS (transcription starting site) profiles 
 
 
 ## how to run in this script
