@@ -33,5 +33,10 @@ Decomposition-based peak identification (DPI), which find peaks across a large n
 Hideya Kawaji
 
 
+## Copyright
+
+RIKEN
+
+
 ## Reference
 A promoter level mammalian expression atlas, Forrest A, Kawaji H, Rehli M, et al. (submitted)
