@@ -6,7 +6,7 @@ Decomposition-based peak identification (DPI), which find peaks across a large n
 
 ## How to run in this script
 
-  % ./dpi_run.sh -r
+    ./dpi_run.sh -r
 
 'dpi_core.R' is the core code, and this shell script is a wrapper.
 
