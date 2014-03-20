@@ -1,7 +1,7 @@
 DPI1
 ====
 
-Decomposition-based peak identification (DPI) - it finds peaks across a large number of TSS (transcription starting site) profiles. This set of scripts is tailored to produce CAGE peaks in FANTOM5 phase 1 (Forrest et. al., 2014, and its related papers), consisting of ~1000 TSS profiles. Note that this set of scripts is a typical patchwork, which depends on many programs and is tested only a few environments. I believe the FANTOM5 peaks are reasonably comprehensive for general analyses in human and mouse, and I won’t recommend to run this set of scripts in every projects. However, still, it might be useful for special purposes or cases. 
+Decomposition-based peak identification (DPI) - it finds peaks across a large number of TSS (transcription starting site) profiles. This set of scripts is tailored to produce CAGE peaks in FANTOM5 phase 1 (Forrest et. al., 2014, and its related papers), consisting of ~1000 TSS profiles. Note that this set of scripts is a typical patchwork, which depends on many programs and is tested only a few environments. I believe the FANTOM5 peaks are reasonably comprehensive for general analyses in human and mouse, and I won’t recommend to run this set of scripts in every projects. However, still, it would be useful for special purposes or cases. 
 
 
 ## How to run in this script
