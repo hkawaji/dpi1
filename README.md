@@ -55,8 +55,7 @@ Hideya Kawaji
 
 ## Copyright
 
-2014 RIKEN, Japan. ALL RIGHTS RESERVED. 
-
+2014 RIKEN, Japan. 
 
 ## Reference
 A promoter level mammalian expression atlas, Forrest A, Kawaji H, Rehli M, et al. (accepted)
