@@ -28,7 +28,7 @@ The shell script wrapper below run 'rake' consecutively via Grid Engine, which w
   - fastICA package (http://cran.r-project.org/web/packages/fastICA/index.html)
   - command line tools to operate bigWig files in http://hgdownload.cse.ucsc.edu/admin/
   - bedTools (https://code.google.com/p/bedtools/)
-  - Grid Engine (developed with UGE)
+  - Unix/Linux with Grid Engine (developed with UGE)
 
 ## Input
 
