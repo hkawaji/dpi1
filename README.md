@@ -1,13 +1,14 @@
 DPI1
 ====
 
-Decomposition-based peak identification (DPI), which find peaks across a large number of TSS (transcription starting site) profiles. This set of scripts is the one used in a paper (Forrest et. al., 2014) and its related papers.
+Decomposition-based peak identification (DPI) - it finds peaks across a large number of TSS (transcription starting site) profiles. This set of scripts is tailored to produce CAGE peaks in FANTOM5 phase 1 (Forrest et. al., 2014, and its related papers). Note that this is a typical patchwork, which depends on many scripts and is tested only a few environments. I believe the FANTOM5 peaks are reasonably comprehensive for general analysis for human and mouse, and I won’t recommend to run it for every analysis. However, still, this might be useful for special purposes or cases. 
+
 
 ## How to run in this script
 
-Step1.  preparation - set parameters in Rakefile
+Step1.  set parameters in Rakefile
 
-At least, these parameters have to be set properly:
+At least, these parameters have to be set properly for your environment:
 
     genome = "~/BEDTools/genomes/human.hg19.genome"
     ctss_path = "../in/ctss/*.ctss.bed.gz"
