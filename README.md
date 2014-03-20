@@ -5,7 +5,7 @@ Decomposition-based peak identification (DPI), which find peaks across a large n
 
 ## How to run in this script
 
-1.  preparation - set parameters in Rakefile
+Step1.  preparation - set parameters in Rakefile
 
 At least, these parameters have to be set properly:
 
@@ -13,7 +13,7 @@ At least, these parameters have to be set properly:
     ctss_path = "../in/ctss/*.ctss.bed.gz"
     out_path = "../dpiout/"
 
-2. run
+Step2. run
 
 The shell script wrapper below run 'rake' consecutively via Grid Engine, which was required to handle thousands of CAGE data on the human genome. You could run individual commands without Grid Engine for a smaller set of data.
 
