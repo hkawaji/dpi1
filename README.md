@@ -43,7 +43,6 @@ Many files are generated under ${out_path}. Main results are:
 Additional useful files:
 
   - ${out_path}/tc.decompose_smoothing_merged.bed.gz - all peaks
-  - ${out_path}/tc.decompose_smoothing_merged.ctssMaxCounts3.bed.gz - permissive peaks
   - ${out_path}/outCounts - bigWig files of CTSS counts
   - ${out_path}/outTpm - bigWig files of CTSS activity (normalized counts)
 
