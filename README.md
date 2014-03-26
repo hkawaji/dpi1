@@ -1,24 +1,7 @@
 DPI1
 ====
 
-Decomposition-based peak identification (DPI) - it finds peaks across a large number of TSS (transcription starting site) profiles. This set of scripts is tailored to produce CAGE peaks in FANTOM5 phase 1 (Forrest et. al., 2014, and its related papers), consisting of ~1000 TSS profiles. Note that this set of scripts is a typical patchwork, which depends on many programs and is tested only a few environments. I believe the FANTOM5 peaks are reasonably comprehensive for general analyses in human and mouse, and I won’t recommend to run this set of scripts in every projects. However, still, it would be useful for special purposes or cases. 
-
-
-## How to run in this script
-
-Step1.  set parameters in Rakefile
-
-At least, these parameters have to be set properly for your environment:
-
-    genome = "~/BEDTools/genomes/human.hg19.genome"
-    ctss_path = "../in/ctss/*.ctss.bed.gz"
-    out_path = "../dpiout/"
-
-Step2. run
-
-The shell script wrapper below run 'rake' consecutively via Grid Engine, which was required to handle thousands of CAGE data on the human genome. You could run individual commands without Grid Engine for a smaller set of data.
-
-    ./00run.sh >& 00run.err
+Decomposition-based peak identification (DPI) - it finds peaks across a large number of TSS (transcription starting site) profiles. This set of scripts is tailored to produce CAGE peaks in FANTOM5 phase 1 (Forrest et. al., 2014, and its related papers), consisting of ~1000 TSS profiles. Note that this set of scripts is a typical patchwork, which depends on many programs and is tested only a few environments. I believe the FANTOM5 peaks are reasonably comprehensive for general analyses in human and mouse, and I won’t recommend to run this set of scripts in every projects. However, still, it would make a lot of sense to run this set of scripts for special purposes or cases. 
 
 
 ## Requirements 
@@ -30,9 +13,36 @@ The shell script wrapper below run 'rake' consecutively via Grid Engine, which w
   - bedTools (https://code.google.com/p/bedtools/)
   - Unix/Linux with Grid Engine (developed with UGE)
 
+## Installation
+
+    % git clone https://github.com/hkawaji/dpi1.git
+
+## How to run in this script
+
+Step1.  set parameters in Rakefile
+
+At least, these parameters in the Rakefile ( ${dpi_root}/Rakefile ) have to be set properly for your environment:
+
+    % cd ${dpi_root}
+    % head -10 Rakefile
+    ...
+    genome = "~/BEDTools/genomes/human.hg19.genome"
+    ctss_path = "../in/ctss/*.ctss.bed.gz"
+    out_path = "../dpiout/"
+    ...
+
+Step2. run
+
+The shell script wrapper below run 'rake' consecutively via Grid Engine, which was required to handle thousands of CAGE data on the human genome. You could run individual commands without Grid Engine for a smaller set of data.
+
+    % cd ${dpi_root}
+    ./00run.sh >& 00run.err
+
+
 ## Input
 
-  - CAGE read counts per CTSS (5'end of CAGE reads) in BED format, gzipped.
+  - CAGE read counts per CTSS (CAGE tag starting site - 5'end of CAGE reads) in BED format, gzipped.
+
 
 ## Output
 
