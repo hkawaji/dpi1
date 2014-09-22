@@ -9,9 +9,9 @@ biological states in human and mouse, and the analysis results have been
 available at http://fantom.gsc.riken.jp/5/ as well as the article above.
 
 In general, I recommend to use the FANTOM5 peak set for CAGE analysis, rather
-than runnning this tool for your own set, so that you can compare your results
-with others. I would recommend to run this to identify a set of TSS peaks in
-other organisms than human and mouse, or very unique biological condition not
+than runnning this tool for your own data, so that you can compare your results
+with others. I would recommend to run this tool to identify a set of TSS peaks in
+other organisms than human and mouse, or very unique biological conditions not
 included in the FANTOM5 sample collecttion.
 
 
@@ -33,7 +33,7 @@ Installation
 How to run
 -----------
 
-    % ${DPI1_DIR}/identify_tss_peaks.sh
+    % ${INSTALLED_DIR}/identify_tss_peaks.sh
 
 Follow the usage described in the message.
 
@@ -42,7 +42,7 @@ Update (branches)
 -----------------
 * beta (current master) (Sep, 2014)
   - a wrapper script is updated as 'identify_tss_peaks.sh',
-    which enables us to run the steps in any directory.
+    enabling to run the steps in any directory.
   - set 'non-decomposition' mode as default
 * alpha (April, 2014)
   - a wrapper script '00run.sh' perform all the requried steps.
