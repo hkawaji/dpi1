@@ -1,10 +1,22 @@
-DPI1
-====
+Decomposition-based peak identification (DPI)
+=============================================
 
-Decomposition-based peak identification (DPI) - it finds peaks across a large number of TSS (transcription starting site) profiles. This set of scripts is tailored to produce CAGE peaks in FANTOM5 phase 1 (Forrest et. al., 2014, and its related papers), consisting of ~1000 TSS profiles. Note that this set of scripts is a typical patchwork, which depends on many programs and is tested only a few environments. I believe the FANTOM5 peaks are reasonably comprehensive for general analyses in human and mouse, and I won’t recommend to run this set of scripts in every projects. However, still, it would make a lot of sense to run this set of scripts for special purposes or cases. 
+This tool identifies a set of reference peaks in in genome-wide TSS (transcription
+starting site) profiles obtained from diverse range of biological states. In
+particular, this is developed for the FANTOM5 project (Nature 507, 462-467, 2014
+and its related papers) that produced CAGE profiles in more than one thousand of
+biological states in human and mouse, and the analysis results have been
+available at http://fantom.gsc.riken.jp/5/ as well as the article above.
+
+In general, I recommend to use the FANTOM5 peak set for CAGE analysis, rather
+than runnning this tool for your own set, so that you can compare your results
+with others. I would recommend to run this to identify a set of TSS peaks in
+other organisms than human and mouse, or very unique biological condition not
+included in the FANTOM5 sample collecttion.
 
 
-## Requirements 
+Requirements 
+------------
 
   - ruby (https://www.ruby-lang.org)
   - R (http://cran.r-project.org/)
@@ -13,61 +25,43 @@ Decomposition-based peak identification (DPI) - it finds peaks across a large nu
   - bedTools (https://code.google.com/p/bedtools/)
   - Unix/Linux with Grid Engine (developed with UGE)
 
-## Installation
+Installation
+------------
 
     % git clone https://github.com/hkawaji/dpi1.git
 
-## How to run in this script
+How to run
+-----------
 
-Step1.  set parameters in Rakefile
+    % ${DPI1_DIR}/identify_tss_peaks.sh
 
-At least, these parameters in the Rakefile ( ${dpi_root}/Rakefile ) have to be set properly for your environment:
-
-    % cd ${dpi_root}
-    % head -10 Rakefile
-    ...
-    genome = "~/BEDTools/genomes/human.hg19.genome"
-    ctss_path = "../in/ctss/*.ctss.bed.gz"
-    out_path = "../dpiout/"
-    ...
-
-Step2. run
-
-The shell script wrapper below run 'rake' consecutively via Grid Engine, which was required to handle thousands of CAGE data on the human genome. You could run individual commands without Grid Engine for a smaller set of data.
-
-    % cd ${dpi_root}
-    ./00run.sh >& 00run.err
+Follow the usage described in the message.
 
 
-## Input
-
-  - CAGE read counts per CTSS (CAGE tag starting site - 5'end of CAGE reads) in BED format, gzipped.
-
-
-## Output
-
-Many files are generated under ${out_path}. Main results are:
-
-  - ${out_path}/tc.decompose_smoothing_merged.ctssMaxCounts11_ctssMaxTpm1.bed.gz -  robust peaks
-  - ${out_path}/tc.decompose_smoothing_merged.ctssMaxCounts3.bed.gz - permissive peaks
-
-Additional useful files:
-
-  - ${out_path}/tc.decompose_smoothing_merged.bed.gz - all peaks
-  - ${out_path}/outCounts - bigWig files of CTSS counts
-  - ${out_path}/outTpm - bigWig files of CTSS activity (normalized counts)
+Update (branches)
+-----------------
+* beta (current master) (Sep, 2014)
+  - a wrapper script is updated as 'identify_tss_peaks.sh',
+    which enables us to run the steps in any directory.
+  - set 'non-decomposition' mode as default
+* alpha (April, 2014)
+  - a wrapper script '00run.sh' perform all the requried steps.
+* core (Dec, 2013):
+  - only the core script of R
 
 
-## Author
-
+Author
+------
 Hideya Kawaji
 
 
-## Copyright
-
+Copyright
+---------
 2014 RIKEN, Japan. 
 
-## Reference
-A promoter level mammalian expression atlas, Forrest A, Kawaji H, Rehli M, et al. (accepted)
+
+Reference
+---------
+* A promoter level mammalian expression atlas, Forrest A, Kawaji H, Rehli M, et al. Nature 507, 462-467, 2014
 
 

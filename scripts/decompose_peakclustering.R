@@ -246,8 +246,39 @@ peakClustersFromCtssVec_print <- function(ctss, gaussian_window_size_half, bedLi
   }
 }
 
-    
-main <- function(
+
+main_spi <- function(
+  infile_base,
+  infile_ctss_pref,
+  gaussian_window_size_half,
+  length_to_decompose,
+  noise_subtraction_ratio,
+  verbose=T )
+{
+  base = read.table(infile_base,sep="\t",as.is=T,nrow=-1)
+  colnames(base) = c("chrom","start","stop","name","score","strand")
+
+  infile_ctss = c(
+    sprintf("%s.fwd.bw", infile_ctss_pref ),
+    sprintf("%s.rev.bw", infile_ctss_pref )
+  )
+
+  for (i in 1:nrow(base))
+  {
+    bedLine = base[i,]
+    if ( (bedLine$stop - bedLine$start)  < length_to_decompose )
+    {
+      write.table( bedLine, sep="\t", quote=F, row.names=F,col.names=F)
+      next
+    }
+    if (verbose){ cat( "#", paste( bedLine , collapse="\t") , "\n") }
+    ctss = getCtssCountsTable(bedLine, infile_ctss, noise_subtraction_ratio )
+    peakClustersFromCtssVec_print(ctss, gaussian_window_size_half, bedLine)
+  }
+}
+
+
+main_dpi <- function(
   infile_base, path, pattern, exclude_prefix=NA,
   gaussian_window_size_half=20,
   n.comp.upper_bound = Inf,
@@ -301,4 +332,6 @@ main <- function(
   }
 
 }
+
+
 

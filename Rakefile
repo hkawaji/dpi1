@@ -2,8 +2,8 @@
 #---------------------------
 #   general setting
 #---------------------------
-genome = "/home/kawaji/local/opt/BEDTools/genomes/human.hg19.genome"
-ctss_path = "../in/ctss/hg19/*.ctss.bed.gz"
+genome = "/home/opt/bedtools/genomes/human.hg19.genome"
+ctss_path = "../in/f5/basic/human.cell_line.hCAGE/*.bed.gz"
 out_path = "../dpiout/"
 #---------------------------
 
@@ -24,6 +24,33 @@ n_comp_upper_bound = 5
 ### for smoothing, after decomposition
 gaussian_window_size_half = 5
 #---------------------------
+
+
+###
+### setting parameters from environmental variables (dpi_*)
+###
+%w(
+  dpi_genome dpi_ctss_path dpi_out_path
+  dpi_cluster_dist dpi_ctss_max_counts_threshold
+  dpi_noise_subtraction_ratio dpi_length_to_decompose
+  dpi_count_to_decompose dpi_n_comp_upper_bound
+  dpi_gaussian_window_size_half
+).each do |k|
+  if ENV.key?(k)
+    n = k.sub("dpi_","")
+    v = ENV[k]
+    if ENV.key?("curr_dir")
+      if v.match("^/")
+      else
+        v = ENV["curr_dir"] + "/" + v
+      end
+    end
+    eval( "#{n} = '#{v}'" ) 
+  end
+end
+
+
+
 
 
 task :prep do |t|
@@ -158,12 +185,13 @@ task :tc => "#{out_path}/outPooled/tc.bed.gz"
 ###
 
 ### for long
-file "#{out_path}/outPooled/tc.long" do |t|
+file "#{out_path}/outPooled/tc.long" => :tc do |t|
   sh %! rm -rf #{t.name} !
   sh %! mkdir -p #{t.name} !
   sh %! gunzip -c #{out_path}/outPooled/tc.bed.gz \
       | awk '{if( (($3 - $2) > #{length_to_decompose}) && ($5 > #{count_to_decompose}) ){print}}' \
-      | split --suffix-length=5 --lines=1000  - #{t.name}/ !
+      | gzip -c > #{t.name}.bed.gz !
+  sh %! gunzip -c #{t.name}.bed.gz | split --suffix-length=5 --lines=1000  - #{t.name}/ !
 end
 task :tc_long => "#{out_path}/outPooled/tc.long"
 
@@ -185,6 +213,55 @@ end
 task :tc_short => "#{out_path}/outPooled/tc.short.bed.gz"
 
 
+
+###
+### simple smoothing, followed by threshoulding (without decomposition)
+###
+file "#{out_path}/outPooled/tc.long.spi.bed.gz" => :tc_long do |t|
+  infile_base = "#{out_path}/outPooled/tc.long.bed.gz"
+  infile_ctss_pref = "#{out_path}/outPooled/ctssTotalCounts"
+  outfile = "#{out_path}/outPooled/tc.long.spi.bed.gz"
+  path = "#{out_path}/outPooled"
+  pattern="ctssTotalCounts.*.bw$"
+  sh %! echo 'source("./scripts/decompose_peakclustering.R");
+              main_spi(
+                infile_base="#{infile_base}", 
+                infile_ctss_pref="#{infile_ctss_pref}",
+                gaussian_window_size_half=#{gaussian_window_size_half},
+                length_to_decompose = #{length_to_decompose} ,
+                noise_subtraction_ratio = #{noise_subtraction_ratio} )' \
+      | R --slave \
+      | gzip -c > #{t.name} !
+end
+task :spi_long => "#{out_path}/outPooled/tc.long.spi.bed.gz" 
+
+
+file "#{out_path}/outPooled/tc.spi_merged.bed.gz" => [:spi_long, :tc_short] do |t|
+
+  sh %! gunzip -c \
+          #{out_path}/outPooled/tc.long.spi.bed.gz \
+      | grep -v ^# \
+      | awk '{if($6=="+"){print}}' \
+      | awk 'BEGIN{OFS="\t"}{print $1,$2,$3, $1":"$2".."$3","$4, 1000,$6 }' \
+      | ./scripts/bed2peakBed9.sh -b #{out_path}/outPooled/ctssTotalCounts.fwd.bw -c "255,0,0" \
+      > #{t.name}.tmp !
+
+  sh %! gunzip -c \
+          #{out_path}/outPooled/tc.long.spi.bed.gz \
+      | grep -v ^# \
+      | awk '{if($6=="-"){print}}' \
+      | awk 'BEGIN{OFS="\t"}{print $1,$2,$3, $1":"$2".."$3","$4, 1000,$6 }' \
+      | ./scripts/bed2peakBed9.sh -b #{out_path}/outPooled/ctssTotalCounts.rev.bw -c "0,0,255" \
+      >> #{t.name}.tmp !
+
+  sh %! gunzip -c #{out_path}/outPooled/tc.short.bed.gz >> #{t.name}.tmp !
+  sh %! sort -k1,1 -k2,2n #{t.name}.tmp | gzip -c > #{t.name} !
+  sh %! rm -f #{t.name}.tmp !
+end
+task :spi_merge => "#{out_path}/outPooled/tc.spi_merged.bed.gz"
+
+
+
 ###
 ### decomposition, smoothing, and threshoulding
 ###
@@ -200,7 +277,7 @@ FileList["#{out_path}/outPooled/tc.long/a*"].each do |infile|
   pattern=".bw$"
   file outfile do |t|
     sh %! echo 'source("./scripts/decompose_peakclustering.R");
-                main(
+                main_dpi(
                   infile_base="#{infile_base}", path="#{path}", pattern="#{pattern}",
                   exclude_prefix = "xxxxxxxxxxxx\.",
                   gaussian_window_size_half=#{gaussian_window_size_half},
@@ -308,8 +385,8 @@ end
 
 ### permissive
 [3].each do |cutoff|
-  outfile = "#{out_path}/outPooled/tc.decompose_smoothing_merged.ctssMaxCounts#{cutoff}.bed.gz"
-  file outfile do |t|
+  outfile_dpi = "#{out_path}/outPooled/tc.decompose_smoothing_merged.ctssMaxCounts#{cutoff}.bed.gz"
+  file outfile_dpi do |t|
     sh %! bigWigToBedGraph #{out_path}/outPooled/ctssMaxCounts.fwd.bw /dev/stdout \
         | awk --assign cutoff=#{cutoff} 'BEGIN{OFS="\t"}{if($4 >= cutoff ){print $1,$2,$3,".",$4,"+"}}' > #{t.name}.tmp !
     sh %! bigWigToBedGraph #{out_path}/outPooled/ctssMaxCounts.rev.bw /dev/stdout \
@@ -318,20 +395,33 @@ end
         | gzip -c > #{t.name} !
     sh %! rm -f #{t.name}.tmp !
   end
-  task :threshold => outfile
+  task :threshold => outfile_dpi
+
+
+  outfile_spi = "#{out_path}/outPooled/tc.spi_merged.ctssMaxCounts#{cutoff}.bed.gz"
+  file outfile_spi => :spi_merge do |t|
+    sh %! bigWigToBedGraph #{out_path}/outPooled/ctssMaxCounts.fwd.bw /dev/stdout \
+        | awk --assign cutoff=#{cutoff} 'BEGIN{OFS="\t"}{if($4 >= cutoff ){print $1,$2,$3,".",$4,"+"}}' > #{t.name}.tmp !
+    sh %! bigWigToBedGraph #{out_path}/outPooled/ctssMaxCounts.rev.bw /dev/stdout \
+        | awk --assign cutoff=#{cutoff} 'BEGIN{OFS="\t"}{if($4 >= cutoff ){print $1,$2,$3,".",$4,"-"}}' >> #{t.name}.tmp !
+    sh %! intersectBed -s -wa -u -a #{out_path}/outPooled/tc.spi_merged.bed.gz -b #{t.name}.tmp \
+        | gzip -c > #{t.name} !
+    sh %! rm -f #{t.name}.tmp !
+  end
+  task :spi => outfile_spi
+
 end
 
 ### robust
 [[11, 1]].each do |cutoff,cutoff_tpm|
-  outfile = "#{out_path}/outPooled/tc.decompose_smoothing_merged.ctssMaxCounts#{cutoff}_ctssMaxTpm#{cutoff_tpm}.bed.gz"
-  file outfile do |t|
+  outfile_dpi = "#{out_path}/outPooled/tc.decompose_smoothing_merged.ctssMaxCounts#{cutoff}_ctssMaxTpm#{cutoff_tpm}.bed.gz"
+  file outfile_dpi do |t|
     sh %! bigWigToBedGraph #{out_path}/outPooled/ctssMaxCounts.fwd.bw /dev/stdout \
         | awk --assign cutoff=#{cutoff} 'BEGIN{OFS="\t"}{if($4 >= cutoff ){print $1,$2,$3,".",$4,"+"}}' > #{t.name}.tmp !
     sh %! bigWigToBedGraph #{out_path}/outPooled/ctssMaxCounts.rev.bw /dev/stdout \
         | awk --assign cutoff=#{cutoff} 'BEGIN{OFS="\t"}{if($4 >= cutoff ){print $1,$2,$3,".",$4,"-"}}' >> #{t.name}.tmp !
     sh %! intersectBed -s -wa -u -a #{out_path}/outPooled/tc.decompose_smoothing_merged.bed.gz -b #{t.name}.tmp \
         | gzip -c > #{t.name}.tmp2.gz !
-
 
     sh %! bigWigToBedGraph #{out_path}/outPooled/ctssMaxTpm.fwd.bw /dev/stdout \
         | awk --assign cutoff_tpm=#{cutoff_tpm} 'BEGIN{OFS="\t"}{if($4 >= cutoff_tpm ){print $1,$2,$3,".",$4,"+"}}' > #{t.name}.tmp !
@@ -342,7 +432,30 @@ end
 
     sh %! rm -f #{t.name}.tmp #{t.name}.tmp2.gz !
   end
-  task :threshold => outfile
+  task :threshold => outfile_dpi
+
+
+  outfile_spi = "#{out_path}/outPooled/tc.spi_merged.ctssMaxCounts#{cutoff}_ctssMaxTpm#{cutoff_tpm}.bed.gz"
+  file outfile_spi do |t|
+    sh %! bigWigToBedGraph #{out_path}/outPooled/ctssMaxCounts.fwd.bw /dev/stdout \
+        | awk --assign cutoff=#{cutoff} 'BEGIN{OFS="\t"}{if($4 >= cutoff ){print $1,$2,$3,".",$4,"+"}}' > #{t.name}.tmp !
+    sh %! bigWigToBedGraph #{out_path}/outPooled/ctssMaxCounts.rev.bw /dev/stdout \
+        | awk --assign cutoff=#{cutoff} 'BEGIN{OFS="\t"}{if($4 >= cutoff ){print $1,$2,$3,".",$4,"-"}}' >> #{t.name}.tmp !
+    sh %! intersectBed -s -wa -u -a #{out_path}/outPooled/tc.spi_merged.bed.gz -b #{t.name}.tmp \
+        | gzip -c > #{t.name}.tmp2.gz !
+
+    sh %! bigWigToBedGraph #{out_path}/outPooled/ctssMaxTpm.fwd.bw /dev/stdout \
+        | awk --assign cutoff_tpm=#{cutoff_tpm} 'BEGIN{OFS="\t"}{if($4 >= cutoff_tpm ){print $1,$2,$3,".",$4,"+"}}' > #{t.name}.tmp !
+    sh %! bigWigToBedGraph #{out_path}/outPooled/ctssMaxTpm.rev.bw /dev/stdout \
+        | awk --assign cutoff_tpm=#{cutoff_tpm} 'BEGIN{OFS="\t"}{if($4 >= cutoff_tpm ){print $1,$2,$3,".",$4,"-"}}' >> #{t.name}.tmp !
+    sh %! intersectBed -s -wa -u -a #{t.name}.tmp2.gz  -b #{t.name}.tmp \
+        | gzip -c > #{t.name} !
+
+    sh %! rm -f #{t.name}.tmp #{t.name}.tmp2.gz !
+  end
+  task :spi => outfile_spi
+
+
 end
 
 
