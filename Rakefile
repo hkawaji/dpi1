@@ -41,8 +41,11 @@ gaussian_window_size_half = 5
     v = ENV[k]
     if ENV.key?("curr_dir")
       if v.match("^/")
+        # do nothing, since absolute path
+      elsif k.match("path")
+        v = ENV["curr_dir"] + "/" + v 
       else
-        v = ENV["curr_dir"] + "/" + v
+        # do nothing, since 'v' is not path
       end
     end
     eval( "#{n} = '#{v}'" ) 
@@ -185,7 +188,7 @@ task :tc => "#{out_path}/outPooled/tc.bed.gz"
 ###
 
 ### for long
-file "#{out_path}/outPooled/tc.long" => :tc do |t|
+file "#{out_path}/outPooled/tc.long" do |t|
   sh %! rm -rf #{t.name} !
   sh %! mkdir -p #{t.name} !
   sh %! gunzip -c #{out_path}/outPooled/tc.bed.gz \
@@ -196,7 +199,7 @@ end
 task :tc_long => "#{out_path}/outPooled/tc.long"
 
 ### for short
-file "#{out_path}/outPooled/tc.short.bed.gz" => :tc do |t|
+file "#{out_path}/outPooled/tc.short.bed.gz" do |t|
   sh %! gunzip -c #{out_path}/outPooled/tc.bed.gz \
       | awk '{if( (($3 - $2) <= #{length_to_decompose}) || ($5 <= #{count_to_decompose}) ){print}}' \
       | grep -- '+$' \
@@ -217,7 +220,7 @@ task :tc_short => "#{out_path}/outPooled/tc.short.bed.gz"
 ###
 ### simple smoothing, followed by threshoulding (without decomposition)
 ###
-file "#{out_path}/outPooled/tc.long.spi.bed.gz" => :tc_long do |t|
+file "#{out_path}/outPooled/tc.long.spi.bed.gz" do |t|
   infile_base = "#{out_path}/outPooled/tc.long.bed.gz"
   infile_ctss_pref = "#{out_path}/outPooled/ctssTotalCounts"
   outfile = "#{out_path}/outPooled/tc.long.spi.bed.gz"
@@ -236,7 +239,7 @@ end
 task :spi_long => "#{out_path}/outPooled/tc.long.spi.bed.gz" 
 
 
-file "#{out_path}/outPooled/tc.spi_merged.bed.gz" => [:spi_long, :tc_short] do |t|
+file "#{out_path}/outPooled/tc.spi_merged.bed.gz" => [:spi_long] do |t|
 
   sh %! gunzip -c \
           #{out_path}/outPooled/tc.long.spi.bed.gz \
@@ -436,7 +439,7 @@ end
 
 
   outfile_spi = "#{out_path}/outPooled/tc.spi_merged.ctssMaxCounts#{cutoff}_ctssMaxTpm#{cutoff_tpm}.bed.gz"
-  file outfile_spi do |t|
+  file outfile_spi => :spi_merge do |t|
     sh %! bigWigToBedGraph #{out_path}/outPooled/ctssMaxCounts.fwd.bw /dev/stdout \
         | awk --assign cutoff=#{cutoff} 'BEGIN{OFS="\t"}{if($4 >= cutoff ){print $1,$2,$3,".",$4,"+"}}' > #{t.name}.tmp !
     sh %! bigWigToBedGraph #{out_path}/outPooled/ctssMaxCounts.rev.bw /dev/stdout \
