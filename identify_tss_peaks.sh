@@ -76,9 +76,9 @@ EOF
 }
 
 
-
+RAKE_OPT=""
 decomposition=N
-while getopts d:g:i:o:b:m:n:l:r:u: opt
+while getopts d:g:i:o:b:m:n:l:r:u:y opt
 do
   case ${opt} in
   d) export decomposition=${OPTARG};;
@@ -91,6 +91,7 @@ do
   l) export dpi_length_to_decompose=${OPTARG};;
   r) export dpi_count_to_decompose=${OPTARG};;
   u) export dpi_n_comp_upper_bound=${OPTARG};;
+  y) RAKE_OPT="${RAKE_OPT} --dry-run " ;;
   *) usage;;
   esac
 done
@@ -122,18 +123,21 @@ case ${decomposition} in
   "n"|"N")
     (
     cd $installed_dir
-    rake clean_all
-    rake prep
-    rake bw
-    rake spi
+    rake ${RAKE_OPT} clean_all
+    rake ${RAKE_OPT} prep
+    rake ${RAKE_OPT} bw
+    rake ${RAKE_OPT} tc
+    rake ${RAKE_OPT} tc_short
+    rake ${RAKE_OPT} tc_long
+    rake ${RAKE_OPT} spi
     )
   ;;
   "y"|"Y")
     (
     cd $installed_dir
     ### prep ###
-    rake clean_all
-    rake prep
+    rake ${RAKE_OPT} clean_all
+    rake ${RAKE_OPT} prep
 
     ### 01 ###
     for X in $(rake --dry-run bw 2>&1 | grep Execute | cut -f 5 -d ' ' | grep -v '^bw$')
