@@ -2,7 +2,7 @@
 #---------------------------
 #   general setting
 #---------------------------
-genome = "../in/canFam3.chrom.sizes"
+genome = "../in/hg19.chrom.sizes"
 ctss_path = "../in/*.bed.gz"
 out_path = "../dpiout/"
 #---------------------------
