@@ -33,13 +33,17 @@ Installation
 How to run
 -----------
 
-    % ${INSTALLED_DIR}/identify_tss_peaks.sh
+    % cd ${INSTALLED_DIR}
+    % ./identify_tss_peaks.sh [options]
 
 Follow the usage described in the message.
 
 
 Update (branches)
 -----------------
+* beta2 (current master) (June, 2016)
+  - updated for compatibility to the recent version of bedtools (v2.25.0) and jksrc (v333).
+  - updated for portability of user environment
 * beta (current master) (Sep, 2014)
   - a wrapper script is updated as 'identify_tss_peaks.sh',
     enabling to run the steps in any directory.
@@ -57,7 +61,7 @@ Hideya Kawaji
 
 Copyright
 ---------
-2014 RIKEN, Japan. 
+2014-2016 RIKEN, Japan. 
 
 
 Reference
