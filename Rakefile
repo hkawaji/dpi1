@@ -108,40 +108,25 @@ end
   ctssMaxTpm      = "#{out_path}/outPooled/ctssMaxTpm.#{strand}.bw"
 
   file ctssTotalCounts do |t|
-    tmpfiles = []
-    FileList["#{out_path}/outCounts/*#{strand}.bw"].each do |infile|
-      tmpfiles << "#{out_path}/outPooled/" + File.basename(infile) + ".bg"
-      sh %! bigWigToBedGraph #{infile} #{tmpfiles.last} !
-    end
-
-    sh %! unionBedGraphs -i #{tmpfiles.join(" ")} \
-        | awk 'BEGIN{OFS="\t";CONVFMT="%f"}{max=0;sum=0;for (i=4;i<=NF;i=i+1) {sum=sum+$i; if($i > max){max=$i}}; print $1,$2,$3,sum,max}' \
-        > #{t.name}.tmp !
-
-    sh %! cut -f 1,2,3,4 #{t.name}.tmp > #{t.name}.tmpTotal !
-    sh %! cut -f 1,2,3,5 #{t.name}.tmp > #{t.name}.tmpMax !
-
-    sh %! bedGraphToBigWig #{t.name}.tmpTotal #{genome} #{t.name} !
-    sh %! bedGraphToBigWig #{t.name}.tmpMax   #{genome} #{ctssMaxCounts} !
-
-    sh %! rm -f #{tmpfiles.join(" ")} #{t.name}.tmp #{t.name}.tmpTotal #{t.name}.tmpMax !
+    sh %! ulimit -n 2048; bigWigMerge #{out_path}/outCounts/*#{strand}.bw /dev/stdout | sort -k1,1 -k2,2n > #{t.name}.tmp !
+    sh %! bedGraphToBigWig #{t.name}.tmp #{genome} #{t.name} !
+    sh %! rm -f #{t.name}.tmp !
   end
 
+  file ctssMaxCounts do |t|
+    sh %! ulimit -n 2048; bigWigMerge -max #{out_path}/outCounts/*#{strand}.bw /dev/stdout | sort -k1,1 -k2,2n > #{t.name}.tmp !
+    sh %! bedGraphToBigWig #{t.name}.tmp #{genome} #{t.name} !
+    sh %! rm -f #{t.name}.tmp !
+  end
 
   file ctssMaxTpm do |t|
-    tmpfiles = []
-    FileList["#{out_path}/outTpm/*#{strand}.bw"].each do |infile|
-      tmpfiles << "#{out_path}/outPooled/" + File.basename(infile) + ".tpm_bg"
-      sh %! bigWigToBedGraph #{infile} #{tmpfiles.last} !
-    end
-    sh %! unionBedGraphs -i #{tmpfiles.join(" ")} \
-        | awk 'BEGIN{OFS="\t";CONVFMT="%f"}{max=0;for (i=4;i<=NF;i=i+1) {if($i > max){max=$i}}; print $1,$2,$3,max}' \
-        > #{t.name}.tmp !
+    sh %! ulimit -n 2048; bigWigMerge -max #{out_path}/outTpm/*#{strand}.bw /dev/stdout | sort -k1,1 -k2,2n > #{t.name}.tmp !
     sh %! bedGraphToBigWig #{t.name}.tmp #{genome} #{t.name} !
-    sh %! rm -f #{tmpfiles.join(" ")} #{t.name}.tmp !
+    sh %! rm -f #{t.name}.tmp !
   end
 
   task :pool_ctss => ctssTotalCounts
+  task :pool_ctss => ctssMaxCounts
   task :pool_ctss => ctssMaxTpm
 end
 
