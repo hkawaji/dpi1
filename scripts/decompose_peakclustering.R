@@ -268,7 +268,7 @@ getCtssCountsTable <- function(bedLine, infiles, noise_subtraction_ratio = 0)
   tbl[ tbl < 0 ] = 0
   idx1 = which( apply( tbl , 1, max) > 0 )
   idx2 = which( apply( tbl , 2, max) > 0 )
-  tbl = tbl[idx1,idx2]
+  tbl = tbl[idx1,idx2,drop=F]
   tbl
 }
 
