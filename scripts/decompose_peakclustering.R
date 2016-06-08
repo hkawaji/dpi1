@@ -193,7 +193,7 @@ getCtssCounts <- function(bedLine, infile_ctss, force_strandedness=T, noise_subt
   res
 }
 
-getCtssCountsTable <- function(bedLine, infiles, noise_subtraction_ratio)
+getCtssCountsTable_old <- function(bedLine, infiles, noise_subtraction_ratio)
 {
   j = 1
   buf = getCtssCounts(bedLine, infiles[j], force_strandedness=T, noise_subtraction_ratio = noise_subtraction_ratio )
@@ -229,6 +229,49 @@ getCtssCountsTable <- function(bedLine, infiles, noise_subtraction_ratio)
   tbl = tbl[ , colSums(tbl) != 0 ,drop=F]
   tbl
 }
+
+getCtssCountsTable <- function(bedLine, infiles, noise_subtraction_ratio = 0)
+{
+  # prep
+  tbl = c()
+  tmpdir = system("mktemp -d", intern=T)
+  tmplist = sprintf("%s/list.txt", tmpdir)
+  tmpmat  = sprintf("%s/mat.txt", tmpdir)
+  command = sprintf(
+    "./scripts/getCtssCountsTable.sh -c %s -s %s -e %s -i %s > %s",
+    bedLine$chrom, bedLine$start, bedLine$stop, tmplist, tmpmat, tmpmat
+  )
+  if ( bedLine$strand == "+" ){
+    infiles = infiles[ grep(".fwd.bw$", infiles) ]
+  } else if (bedLine$strand == "-" ) {
+    infiles = infiles[ grep(".rev.bw$", infiles) ]
+  } else { 
+    print( sprintf("ERROR: wrong strand:%s", bedLine$strand)  )
+    q()
+  }
+
+  # main
+  tryCatch(
+    { 
+      write.table(infiles, quote=F, row.names=F, col.names=F, file=tmplist )
+      system(command, intern=T)
+      tbl = read.table(tmpmat, row.names=1,header=T, check.names=F)
+      rownames(tbl) = paste( rownames(tbl) , bedLine$strand, sep=",")
+      system(sprintf("rm -rf %s", tmpdir))
+    },
+    finally = system(sprintf("rm -rf %s", tmpdir))
+  )
+
+  # post processing
+  sbtrct = apply(tbl,2,max) * noise_subtraction_ratio
+  tbl = t( t(tbl) - sbtrct )
+  tbl[ tbl < 0 ] = 0
+  idx1 = which( apply( tbl , 1, max) > 0 )
+  idx2 = which( apply( tbl , 2, max) > 0 )
+  tbl = tbl[idx1,idx2]
+  tbl
+}
+
 
 
 peakClustersFromCtssVec_print <- function(ctss, gaussian_window_size_half, bedLine)
