@@ -142,25 +142,25 @@ case ${decomposition} in
     ### 01 ###
     for X in $(rake --dry-run bw 2>&1 | grep Execute | cut -f 5 -d ' ' | grep -v '^bw$')
     do 
-      qsub -o $curr_dir -e $curr_dir -v "${qsub_v}" -N xqsub$$_01_bw ./scripts/qsub.sh $X
+      qsub -cwd -v RAKE_TARGET=$X -o ${dpi_out_path}/log/ -e ${dpi_out_path}/log/ -v "${qsub_v}" -N xqsub$$_01_bw ./scripts/qsub.sh
     done
 
     ### 02 - 05 ###
-    qsub -o $curr_dir -e $curr_dir -v ${qsub_v} -N xqsub$$_02_pool              -hold_jid xqsub$$_01_bw   ./scripts/qsub.sh  pool_ctss
-    qsub -o $curr_dir -e $curr_dir -v ${qsub_v} -N xqsub$$_03_tag_clustering    -hold_jid xqsub$$_02_pool ./scripts/qsub.sh  tc
-    qsub -o $curr_dir -e $curr_dir -v ${qsub_v} -N xqsub$$_04_tc_short          -hold_jid xqsub$$_03_tag_clustering ./scripts/qsub.sh tc_short
-    qsub -o $curr_dir -e $curr_dir -v ${qsub_v} -N xqsub$$_05_tc_long -sync y   -hold_jid xqsub$$_03_tag_clustering ./scripts/qsub.sh tc_long
+    qsub -cwd -o ${dpi_out_path}/log/ -e ${dpi_out_path}/log/ -v ${qsub_v} -N xqsub$$_02_pool -v RAKE_TARGET=pool_ctss -hold_jid xqsub$$_01_bw   ./scripts/qsub.sh
+    qsub -cwd -o ${dpi_out_path}/log/ -e ${dpi_out_path}/log/ -v ${qsub_v} -N xqsub$$_03_tag_clustering -v RAKE_TARGET=tc -hold_jid xqsub$$_02_pool ./scripts/qsub.sh
+    qsub -cwd -o ${dpi_out_path}/log/ -e ${dpi_out_path}/log/ -v ${qsub_v} -N xqsub$$_04_tc_short -v RAKE_TARGET=tc_short -hold_jid xqsub$$_03_tag_clustering ./scripts/qsub.sh
+    qsub -cwd -o ${dpi_out_path}/log/ -e ${dpi_out_path}/log/ -v ${qsub_v} -N xqsub$$_05_tc_long -sync y -v RAKE_TARGET=tc_long -hold_jid xqsub$$_03_tag_clustering ./scripts/qsub.sh
 
     ### 06 ###
     for X in $(rake --dry-run decompose_smoothing 2>&1 | grep Execute | cut -f 5 -d ' ' | grep  '.bed$' )
     do
-      qsub -o $curr_dir -e $curr_dir -v ${qsub_v} -N xqsub$$_06_dpi_each -hold_jid xqsub$$_05_tc_long ./scripts/qsub.sh $X
+      qsub -cwd -o ${dpi_out_path}/log/ -e ${dpi_out_path}/log/ -v ${qsub_v} -N xqsub$$_06_dpi_each -hold_jid xqsub$$_05_tc_long -v RAKE_TARGET=$X ./scripts/qsub.sh
     done
 
     ### 07 - 09 ###
-    qsub -o $curr_dir -e $curr_dir -v ${qsub_v} -N xqsub$$_07_comp_ctss         -hold_jid xqsub$$_06_dpi_each ./scripts/qsub.sh comp_ctss
-    qsub -o $curr_dir -e $curr_dir -v ${qsub_v} -N xqsub$$_08_final             -hold_jid xqsub$$_06_dpi_each,xqsub$$_04_tc_short ./scripts/qsub.sh final
-    qsub -o $curr_dir -e $curr_dir -v ${qsub_v} -N xqsub$$_09_threshold -sync y -hold_jid xqsub$$_08_final ./scripts/qsub.sh threshold
+    qsub -cwd -o ${dpi_out_path}/log/ -e ${dpi_out_path}/log/ -v ${qsub_v} -N xqsub$$_07_comp_ctss -v RAKE_TARGET=comp_ctss -hold_jid xqsub$$_06_dpi_each ./scripts/qsub.sh
+    qsub -cwd -o ${dpi_out_path}/log/ -e ${dpi_out_path}/log/ -v ${qsub_v} -N xqsub$$_08_final -v RAKE_TARGET=final -hold_jid xqsub$$_06_dpi_each,xqsub$$_04_tc_short ./scripts/qsub.sh
+    qsub -cwd -o ${dpi_out_path}/log/ -e ${dpi_out_path}/log/ -v ${qsub_v} -N xqsub$$_09_threshold -sync y -v RAKE_TARGET=threshold -hold_jid xqsub$$_08_final ./scripts/qsub.sh
     )
   ;;
   *)
