@@ -104,7 +104,7 @@ export curr_dir=$(pwd)
 installed_dir=$(dirname $0)
 
 ### prep for qsub
-qsub_v="dummy=dummy"
+qsub_v="PATH"
 for k in curr_dir installed_dir decomposition \
          dpi_genome dpi_ctss_path dpi_out_path \
          dpi_cluster_dist dpi_ctss_max_counts_threshold  \
