@@ -36,6 +36,7 @@ slopBed -b ${extend_bp} -i stdin -g ${genome} \
 | genomeCoverageBed -i stdin -g ${genome} -bga \
 | grep --perl-regexp "\t0$" \
 | complementBed -i stdin -g ${genome} \
+| grep -v --perl-regexp "\t0\t0$" \
 | slopBed -b -${extend_bp} -i stdin -g ${genome} \
 | awk --assign extend_bp=$extend_bp '{if($2 == extend_bp){$2 = 0}{print}}' \
 | awk 'BEGIN{OFS="\t"}{print $1,$2,$3,$1":"$2".."$3}' \
