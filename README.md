@@ -43,10 +43,12 @@ Follow the usage described in the message.
 
 Update (branches)
 -----------------
-* beta2 (current master) (June, 2016)
+* beta3 (current master) (Aug, 2018)
+  - updated for platform compatibility
+* beta2 (June, 2016)
   - updated for compatibility to the recent version of bedtools (v2.25.0) and jksrc (v333).
   - updated for portability of user environment
-* beta (current master) (Sep, 2014)
+* beta (Sep, 2014)
   - a wrapper script is updated as 'identify_tss_peaks.sh',
     enabling to run the steps in any directory.
   - set 'non-decomposition' mode as default
@@ -63,7 +65,7 @@ Hideya Kawaji
 
 Copyright
 ---------
-2014-2016 RIKEN, Japan. 
+2014-2017 RIKEN, Japan. 
 
 
 Reference
