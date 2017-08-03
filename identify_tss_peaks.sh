@@ -55,6 +55,14 @@ OPTIONS
 	- outPooled/tc.[decompose_smoothing|spi_merged].ctssMaxCounts3.bed.gz - 'permissive' threshold
 
 
+NOTES
+------
+* TMPDIR environment variable may have to be set to a directory having enough space,
+  in case that temporary space is running out.
+
+* In the option "-i", single quote is required to specify multiple files.
+
+
 AUTHOR
 ------
 KAWAJI, Hideya
