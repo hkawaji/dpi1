@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 
 ### prep
@@ -30,8 +30,10 @@ if [ "${genome}" = "" ]; then usage; fi
 fwd=${outprefix}.fwd.bw
 rev=${outprefix}.rev.bw
 tmpfile=${outprefix}.tmp.bg
+tmpfile_g=${outprefix}.tmp_g
 
 sum=$( gunzip -c ${infile} | awk 'BEGIN{sum=0}{sum=sum+$5}END{print sum}' )
+sort ${genome} > ${tmpfile_g}
 
 ### fwd
 gunzip -c ${infile} \
@@ -41,7 +43,7 @@ gunzip -c ${infile} \
 | sort -k1,1 -k2,2n \
 > ${tmpfile} 
 
-bedGraphToBigWig ${tmpfile} ${genome} ${fwd}
+bedGraphToBigWig ${tmpfile} ${tmpfile_g} ${fwd}
 
 ### rev
 gunzip -c ${infile} \
@@ -50,7 +52,8 @@ gunzip -c ${infile} \
 | awk --assign sum=${sum} 'BEGIN{OFS="\t";CONVFMT="%f"}{print $1,$2,$3, 1e6 * $5 / sum}' \
 | sort -k1,1 -k2,2n \
 > ${tmpfile} 
-bedGraphToBigWig ${tmpfile} ${genome} ${rev}
+bedGraphToBigWig ${tmpfile} ${tmpfile_g} ${rev}
 
 rm -f ${tmpfile}
+rm -f ${tmpfile_g}
 

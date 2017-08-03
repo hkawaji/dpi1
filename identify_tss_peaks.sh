@@ -62,7 +62,7 @@ KAWAJI, Hideya
 
 COPYRIGHT
 ---------
-2014 RIKEN, Japan.
+2014-2017 RIKEN, Japan.
 
 
 REFERENCE

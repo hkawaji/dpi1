@@ -18,9 +18,11 @@ included in the FANTOM5 sample collecttion.
 Requirements 
 ------------
 
+  - bash (https://www.gnu.org/software/bash/)
   - ruby (https://www.ruby-lang.org)
   - R (http://cran.r-project.org/)
-  - fastICA package (http://cran.r-project.org/web/packages/fastICA/index.html)
+  - R/fastICA package (http://cran.r-project.org/web/packages/fastICA/)
+  - R/tidyr package (https://cran.r-project.org/web/packages/tidyr/)
   - command line tools to operate bigWig files in http://hgdownload.cse.ucsc.edu/admin/
   - bedTools (https://code.google.com/p/bedtools/)
   - Unix/Linux with Grid Engine (developed with UGE)

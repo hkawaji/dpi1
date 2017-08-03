@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 distance=20
 tmpdir=.
@@ -6,10 +6,7 @@ tmpdir=.
 function usage()
 {
   cat <<EOF
-usage: cat input.bed | $0 -g genome [-d min_distance] [-t tmpdir]
-
-Note: The input BED (-i) file must be grouped by chromosome.
-      A simple "sort -k 1,1 <BED> > <BED>.sorted" will suffice.
+usage: cat input.bed | $0 [-d min_distance] 
 
 EOF
   exit 1;
@@ -25,19 +22,16 @@ do
   esac
 done
 
-if [ "${genome}" = "" ]; then usage; fi
+###
+### The steps has been largely simplified, owing the speed-up
+### of mergeBed in bedtools.
+###
+### several parameters remains for backward compatibility,
+### even if they are not required now.
+###
 
-
-extend_bp=$(expr $distance / 2)
-
-#sort -k1,1 --temporary-directory=${tmpdir} \
-
-slopBed -b ${extend_bp} -i stdin -g ${genome} \
-| genomeCoverageBed -i stdin -g ${genome} -bga \
-| grep --perl-regexp "\t0$" \
-| complementBed -i stdin -g ${genome} \
-| grep -v --perl-regexp "\t0\t0$" \
-| slopBed -b -${extend_bp} -i stdin -g ${genome} \
-| awk --assign extend_bp=$extend_bp '{if($2 == extend_bp){$2 = 0}{print}}' \
+sort -k1,1 -k2,2n \
+| mergeBed -d $distance \
 | awk 'BEGIN{OFS="\t"}{print $1,$2,$3,$1":"$2".."$3}' \
+
 

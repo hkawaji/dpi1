@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 
 ### prep
@@ -30,6 +30,9 @@ if [ "${genome}" = "" ]; then usage; fi
 fwd=${outprefix}.fwd.bw
 rev=${outprefix}.rev.bw
 tmpfile=${outprefix}.tmp.bg
+tmpfile_g=${outprefix}.tmp_g
+
+sort ${genome} > ${tmpfile_g}
 
 ### fwd
 gunzip -c ${infile} \
@@ -39,7 +42,7 @@ gunzip -c ${infile} \
 | sort -k1,1 -k2,2n \
 > ${tmpfile} 
 
-bedGraphToBigWig ${tmpfile} ${genome} ${fwd}
+bedGraphToBigWig ${tmpfile} ${tmpfile_g} ${fwd}
 
 ### rev
 gunzip -c ${infile} \
@@ -48,7 +51,8 @@ gunzip -c ${infile} \
 | awk 'BEGIN{OFS="\t"}{print $1,$2,$3,$5}' \
 | sort -k1,1 -k2,2n \
 > ${tmpfile} 
-bedGraphToBigWig ${tmpfile} ${genome} ${rev}
+bedGraphToBigWig ${tmpfile} ${tmpfile_g} ${rev}
 
 rm -f ${tmpfile}
+rm -f ${tmpfile_g}
 
